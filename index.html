@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Via Browser — Optimization Guide</title>
+<meta name="description" content="A precision field guide to mastering ad-blocking, WebView speed flags and privacy settings in Via Browser on Android — no root, no dev background, 10–15 minutes.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Via Browser — Optimization Guide">
+<meta property="og:description" content="Master ad-blocking, speed optimization and privacy on Android. A six-part, no-root field guide for Via Browser.">
+<meta property="og:image" content="og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141613" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+<!-- Resolve theme before first paint: stored choice → system preference -->
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('viaguide:theme');
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ============================================================
+     ICON SPRITE — hand-drawn 24×24 stroke set (1.8px, round caps)
+     ============================================================ -->
+<svg class="sr-only" aria-hidden="true">
+  <defs>
+    <symbol id="i-smartphone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2"/><line x1="10" y1="18.3" x2="14" y2="18.3"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/><rect x="10" y="10" width="4" height="4"/><line x1="12" y1="2.5" x2="12" y2="6.5"/><line x1="12" y1="17.5" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="6.5" y2="12"/><line x1="17.5" y1="12" x2="21.5" y2="12"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.2l2.4 2.4 5-5.2"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5.5" y="4.5" width="13" height="16" rx="1.8"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><line x1="8.5" y1="11" x2="15.5" y2="11"/><line x1="8.5" y1="14.5" x2="15.5" y2="14.5"/><line x1="8.5" y1="18" x2="12.5" y2="18"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.8l7 2.6v6.1c0 4.6-3 7.6-7 9.7-4-2.1-7-5.1-7-9.7V5.4z"/><path d="M8.7 12l2.3 2.3 4.3-4.6"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9.5 3h5"/><path d="M10.5 3v6.2L5.7 18a2 2 0 0 0 1.8 3h9a2 2 0 0 0 1.8-3l-4.8-8.8V3"/><line x1="7.8" y1="15" x2="16.2" y2="15"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5l-6 6 2.4 2.4 6-6a4 4 0 0 0 5-5.4l-3 3-2.4-2.4z"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><line x1="3.5" y1="9.5" x2="20.5" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><path d="M8 14l1.6 1.6L13 12"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+    <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M12 2.5c3 1.4 5 4.6 5 9 0 2-.6 3.6-1.4 4.9L12 14.8l-3.6 1.6C7.6 15.1 7 13.5 7 11.5c0-4.4 2-7.6 5-9z"/><circle cx="12" cy="10.5" r="1.6"/><path d="M9 16.5l-1.5 4 3-1.7M15 16.5l1.5 4-3-1.7"/></symbol>
+    <symbol id="i-trend-down" viewBox="0 0 24 24"><polyline points="3.5 7 10 13.5 14 9.5 20.5 16"/><polyline points="20.5 10 20.5 16 14.5 16"/></symbol>
+    <symbol id="i-battery" viewBox="0 0 24 24"><rect x="2.5" y="8" width="16" height="8" rx="1.8"/><line x1="21" y1="10.5" x2="21" y2="13.5"/><rect x="5.5" y="10.5" width="7" height="3" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3.5 3.5l17 17"/><path d="M10.6 5.3A10.4 10.4 0 0 1 12 5.2c5 0 8.5 3.8 9.5 6.8a11 11 0 0 1-3 4.2M7 6.9C4.6 8.4 3 10.6 2.5 12c1 3 4.5 6.8 9.5 6.8a9.7 9.7 0 0 0 3.4-.6"/><path d="M9.9 10a3 3 0 0 0 4.1 4.1"/></symbol>
+    <symbol id="i-layout" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="1.8"/><line x1="3.5" y1="9.5" x2="20.5" y2="9.5"/><line x1="9.5" y1="9.5" x2="9.5" y2="20"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><polyline points="12 7 12 12 15.5 14"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><line x1="8.5" y1="6" x2="20.5" y2="6"/><line x1="8.5" y1="12" x2="20.5" y2="12"/><line x1="8.5" y1="18" x2="20.5" y2="18"/><circle cx="4" cy="6" r="0.9" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="0.9" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="0.9" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.7" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><polyline points="5 12.5 10 17.5 19 7"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><polyline points="9 8 5 12 9 16"/><polyline points="15 8 19 12 15 16"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="21.5" y2="12"/><line x1="5.3" y1="5.3" x2="6.7" y2="6.7"/><line x1="17.3" y1="17.3" x2="18.7" y2="18.7"/><line x1="18.7" y1="5.3" x2="17.3" y2="6.7"/><line x1="6.7" y1="17.3" x2="5.3" y2="18.7"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 13.5A8 8 0 0 1 10.5 4a8 8 0 1 0 9.5 9.5z"/></symbol>
+  </defs>
+</svg>
+
+<div class="scroll-progress" aria-hidden="true"><span id="scrollProgressBar"></span></div>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <a class="brand" href="#main" aria-label="Via Browser Optimization Guide — top">
+      <span class="brand-mark" aria-hidden="true">V</span>
+      <span class="brand-text">
+        <span class="brand-name">Via Browser</span>
+        <span class="brand-sub">Optimization Guide</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <a class="header-link" href="#" title="View source on GitHub">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#i-code"/></svg><span>Source</span>
+      </a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch color theme">
+        <svg class="icon icon-sun" viewBox="0 0 24 24"><use href="#i-sun"/></svg>
+        <svg class="icon icon-moon" viewBox="0 0 24 24"><use href="#i-moon"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile chip navigation (desktop uses the sidebar) -->
+<nav class="chip-nav" aria-label="Guide parts">
+  <div class="chip-nav-inner" id="chipNav">
+    <a class="chip" href="#acc-part1" data-target="acc-part1"><span class="chip-num mono-num">1</span>Filters</a>
+    <a class="chip" href="#acc-part2" data-target="acc-part2"><span class="chip-num mono-num">2</span>Flags</a>
+    <a class="chip" href="#acc-part3" data-target="acc-part3"><span class="chip-num mono-num">3</span>Privacy</a>
+    <a class="chip" href="#acc-part4" data-target="acc-part4"><span class="chip-num mono-num">4</span>Testing</a>
+    <a class="chip" href="#acc-part5" data-target="acc-part5"><span class="chip-num mono-num">5</span>Fixes</a>
+    <a class="chip" href="#acc-part6" data-target="acc-part6"><span class="chip-num mono-num">6</span>Upkeep</a>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- ============================================================
+       SIDEBAR — progress ring + table of contents (desktop)
+       ============================================================ -->
+  <aside class="sidebar">
+    <div class="side-sticky">
+      <div class="side-progress" aria-hidden="true">
+        <div class="ring">
+          <svg viewBox="0 0 56 56">
+            <circle class="ring-track" cx="28" cy="28" r="24"></circle>
+            <circle class="ring-fill" id="ringFill" cx="28" cy="28" r="24"></circle>
+          </svg>
+          <span class="ring-label mono-num" id="ringPercent">0%</span>
+        </div>
+        <div class="side-progress-info">
+          <span class="side-progress-title">Setup progress</span>
+          <span class="side-progress-sub mono-num" id="sideCount">0 / 6 parts</span>
+        </div>
+      </div>
+
+      <nav class="toc" id="toc" aria-label="Table of contents">
+        <p class="toc-group">Start</p>
+        <a class="toc-link" href="#acc-achieve" data-target="acc-achieve">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#i-target"/></svg><span>What you'll achieve</span>
+        </a>
+        <a class="toc-link" href="#acc-prereq" data-target="acc-prereq">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#i-clipboard"/></svg><span>Prerequisites</span>
+        </a>
+
+        <p class="toc-group">The setup</p>
+        <a class="toc-link" href="#acc-part1" data-target="acc-part1"><span class="toc-no mono-num">01</span><span>Filter configuration</span></a>
+        <a class="toc-link" href="#acc-part2" data-target="acc-part2"><span class="toc-no mono-num">02</span><span>WebView flags</span></a>
+        <a class="toc-link" href="#acc-part3" data-target="acc-part3"><span class="toc-no mono-num">03</span><span>Privacy settings</span></a>
+        <a class="toc-link" href="#acc-part4" data-target="acc-part4"><span class="toc-no mono-num">04</span><span>Testing &amp; verification</span></a>
+        <a class="toc-link" href="#acc-part5" data-target="acc-part5"><span class="toc-no mono-num">05</span><span>Troubleshooting</span></a>
+        <a class="toc-link" href="#acc-part6" data-target="acc-part6"><span class="toc-no mono-num">06</span><span>Maintenance schedule</span></a>
+
+        <p class="toc-group">Outcomes</p>
+        <a class="toc-link" href="#results" data-target="results">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#i-rocket"/></svg><span>Results you can expect</span>
+        </a>
+        <a class="toc-link" href="#summary" data-target="summary">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#i-list"/></svg><span>Configuration summary</span>
+        </a>
+      </nav>
+
+      <p class="side-foot mono-num">NO ROOT · NO ADB · 10–15 MIN</p>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MAIN
+       ============================================================ -->
+  <main class="main" id="main">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="kicker" data-reveal><span class="kicker-diamond" aria-hidden="true"></span>Field guide · N°01</p>
+        <h1 class="hero-title" data-reveal style="--d:60ms">Master <span class="nb">Ad-Blocking,</span> <em>Speed Optimization</em> &amp;&nbsp;Privacy on Android</h1>
+        <p class="hero-sub" data-reveal style="--d:120ms">
+          This guide walks you through configuring Via Browser's ad-blocking engine, tuning WebView's
+          rendering flags, and locking down privacy settings — no root access and no developer background
+          required. Work through the six parts in order, or open whichever section you need.
+        </p>
+        <div class="callout" data-reveal style="--d:180ms">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#i-info"/></svg>
+          <p><span class="callout-tag">Note</span> Menu labels may shift slightly between Via Browser versions — if a setting isn't where this guide says, check nearby menus first.</p>
+        </div>
+        <div class="meta-chips" data-reveal style="--d:240ms">
+          <span class="chip-meta"><svg class="icon" viewBox="0 0 24 24"><use href="#i-smartphone"/></svg>Redmi 12+</span>
+          <span class="chip-meta"><svg class="icon" viewBox="0 0 24 24"><use href="#i-cpu"/></svg>Android 15</span>
+          <span class="chip-meta"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check-circle"/></svg><span class="mono-num">100/100</span>&nbsp;Adblock Score</span>
+        </div>
+      </div>
+
+      <!-- Decorative engine read-out -->
+      <figure class="console" data-reveal style="--d:200ms">
+        <div class="console-head">
+          <span class="console-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="console-title mono-num">via://adblock-engine</span>
+          <span class="console-live mono-num"><span class="live-dot" aria-hidden="true"></span>LIVE</span>
+        </div>
+        <div class="console-body mono-num" aria-hidden="true">
+          <p class="console-line cmd"><span class="prompt">$</span> via.filters --sync --verify</p>
+          <p class="console-line"><span class="tick"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check"/></svg></span>easylist.txt<span class="leader"></span><span data-count="68412">0</span> rules</p>
+          <p class="console-line"><span class="tick"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check"/></svg></span>easyprivacy.txt<span class="leader"></span><span data-count="51937">0</span> rules</p>
+          <p class="console-line"><span class="tick"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check"/></svg></span>fanboy-annoyance<span class="leader"></span><span data-count="63441">0</span> rules</p>
+          <p class="console-line"><span class="tick"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check"/></svg></span>pgl.yoyo.org<span class="leader"></span><span data-count="4921">0</span> rules</p>
+          <p class="console-line cmd"><span class="prompt">$</span> via.score --run<span class="cursor"></span></p>
+        </div>
+        <div class="console-foot">
+          <div class="console-stat">
+            <span class="stat-label">Trackers blocked / page</span>
+            <span class="stat-value mono-num" data-count="35">0</span>
+          </div>
+          <div class="console-stat">
+            <span class="stat-label">Ad-block score</span>
+            <span class="stat-value mono-num"><span data-count="100">0</span>/100</span>
+          </div>
+        </div>
+        <figcaption class="console-caption">Illustrative read-out of a tuned setup — your numbers will vary.</figcaption>
+      </figure>
+    </section>
+
+    <!-- PROGRESS TRACKER -->
+    <section class="tracker" aria-label="Setup progress" data-reveal>
+      <div class="tracker-top">
+        <div class="tracker-readout">
+          <span class="tracker-pct mono-num"><span id="progressPercent">0</span><span class="pct-sign">%</span></span>
+          <span class="tracker-info">
+            <span class="tracker-label">Setup progress</span>
+            <span class="tracker-status" id="progressStatus" role="status">Open a part below to begin</span>
+          </span>
+        </div>
+        <button class="reset-progress" id="resetProgress" type="button">Reset progress</button>
+      </div>
+      <div class="tracker-segments" id="trackerSegments" aria-hidden="true">
+        <span class="segment"></span><span class="segment"></span><span class="segment"></span>
+        <span class="segment"></span><span class="segment"></span><span class="segment"></span>
+      </div>
+    </section>
+
+    <!-- BADGES -->
+    <div class="badges" data-reveal>
+      <span class="badge"><svg class="icon" viewBox="0 0 24 24"><use href="#i-clock"/></svg>10–15 min setup</span>
+      <span class="badge"><svg class="icon" viewBox="0 0 24 24"><use href="#i-shield"/></svg>No technical knowledge required</span>
+      <span class="badge"><svg class="icon" viewBox="0 0 24 24"><use href="#i-cpu"/></svg>Mid-range optimized</span>
+    </div>
+
+    <!-- WHAT YOU'LL ACHIEVE -->
+    <div class="acc open" id="acc-achieve">
+      <h2 class="acc-h">
+        <button class="acc-btn" type="button" aria-expanded="true" aria-controls="acc-achieve-body">
+          <span class="acc-tile"><svg class="icon" viewBox="0 0 24 24"><use href="#i-target"/></svg></span>
+          <span class="acc-heading">
+            <span class="acc-kicker mono-num">Start here</span>
+            <span class="acc-title">What You'll Achieve</span>
+          </span>
+          <span class="acc-chevron"><svg class="icon" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></span>
+        </button>
+      </h2>
+      <div class="acc-panel" id="acc-achieve-body" role="region" aria-label="What you'll achieve">
+        <div class="acc-panel-inner">
+          <div class="acc-body">
+            <ul class="feature-list">
+              <li><strong>A clean, ad-free browsing experience</strong> across news sites, blogs, and forums.</li>
+              <li><strong>Fewer trackers</strong> following you between sites, with analytics and ad-network scripts blocked before they run.</li>
+              <li><strong>Faster page loads</strong>, since the browser skips fetching and rendering blocked resources.</li>
+              <li><strong>Lower data usage</strong> — useful if you're on a limited mobile plan.</li>
+              <li><strong>A 100/100 result</strong> on standard synthetic ad-block score tests.</li>
+              <li><strong>A repeatable setup</strong> you can reapply after a factory reset or on a second device in about 10–15 minutes.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREREQUISITES -->
+    <div class="acc open" id="acc-prereq">
+      <h2 class="acc-h">
+        <button class="acc-btn" type="button" aria-expanded="true" aria-controls="acc-prereq-body">
+          <span class="acc-tile"><svg class="icon" viewBox="0 0 24 24"><use href="#i-clipboard"/></svg></span>
+          <span class="acc-heading">
+            <span class="acc-kicker mono-num">Before you begin</span>
+            <span class="acc-title">Prerequisites</span>
+          </span>
+          <span class="acc-chevron"><svg class="icon" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></span>
+        </button>
+      </h2>
+      <div class="acc-panel" id="acc-prereq-body" role="region" aria-label="Prerequisites">
+        <div class="acc-panel-inner">
+          <div class="acc-body">
+            <ul class="feature-list">
+              <li>An Android phone running <strong>Android 15</strong> (this guide is written and tested on a Redmi 12+, but the steps apply broadly to most Android devices).</li>
+              <li><strong>Via Browser</strong> installed from the Play Store, updated to the latest version.</li>
+              <li>A <strong>Wi-Fi or mobile data connection</strong> to download filter lists (they're small — usually a few megabytes combined).</li>
+              <li><strong>10–15 minutes</strong> of uninterrupted time.</li>
+              <li>No root access, no ADB, and no coding required — every step here uses Via Browser's own settings menu.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         THE SETUP — parts 1–6 on a timeline rail
+         ============================================================ -->
+    <div class="rail-section">
+      <div class="rail-heading" data-reveal>
+        <span class="rail-heading-line" aria-hidden="true"></span>
+        <span class="kicker"><span class="kicker-diamond" aria-hidden="true"></span>The setup</span>
+        <h2 class="rail-title">Six parts, in order</h2>
+      </div>
+
+      <div class="steps-rail">
+
+        <!-- PART 1 -->
+        <div class="rail-row" data-rail="1">
+          <span class="rail-marker" aria-hidden="true"></span>
+          <div class="acc" id="acc-part1" data-part="1">
+            <h3 class="acc-h">
+              <button class="acc-btn" type="button" aria-expanded="false" aria-controls="acc-part1-body">
+                <span class="acc-tile mono-num">01</span>
+                <span class="acc-heading">
+                  <span class="acc-kicker mono-num">Part 01</span>
+                  <span class="acc-title">Filter Configuration</span>
+                </span>
+                <span class="acc-meta mono-num">4 lists</span>
+                <span class="acc-chevron"><svg class="icon" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></span>
+              </button>
+            </h3>
+            <div class="acc-panel" id="acc-part1-body" role="region" aria-label="Part 1 — Filter Configuration">
+              <div class="acc-panel-inner">
+                <div class="acc-body">
+                  <p>Via Browser ships with a built-in ad-blocking engine that works off filter lists — plain-text rule files the same format used by EasyList-compatible blockers. Turning it on and pointing it at a few well-maintained lists is most of the work.</p>
+
+                  <div class="step">
+                    <div class="step-head"><span class="step-no mono-num">1.1</span><h4>Turn on the built-in blocker</h4></div>
+                    <p>Open the Via menu and go to <strong>Settings → Ad Block</strong>, then switch on <strong>Enable Ad Block</strong>. This activates the engine but doesn't add any rules yet — that's the next step.</p>
+                  </div>
+
+                  <div class="step">
+                    <div class="step-head"><span class="step-no mono-num">1.2</span><h4>Add the core filter lists</h4></div>
+                    <p>Still inside <strong>Settings → Ad Block</strong>, choose <strong>Subscribe by URL</strong> and add each list below one at a time. Via downloads and parses each list automatically.</p>
+                  </div>
+
+                  <div class="step">
+                    <div class="step-head"><span class="step-no mono-num">1.3</span><h4>Set the update frequency</h4></div>
+                    <p>Under <strong>Settings → Ad Block → Update Interval</strong>, set it to <strong>Daily</strong> so new rules (and fixes for broken sites) arrive automatically without you doing anything.</p>
+                  </div>
+
+                  <div class="step">
+                    <div class="step-head"><span class="step-no mono-num">1.4</span><h4>Verify the lists loaded</h4></div>
+                    <p>Back in <strong>Filter Lists</strong>, each entry should show a green check and a rule count next to it. A grey or red entry means the download failed — re-add that URL or check your connection.</p>
+                  </div>
+
+                  <div class="copy-all-row">
+                    <span>Add each list individually below, or</span>
+                    <button class="copy-btn" type="button" data-copy="https://easylist.to/easylist/easylist.txt&#10;https://easylist.to/easylist/easyprivacy.txt&#10;https://easylist.to/easylist/fanboy-annoyance.txt&#10;https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&amp;mimetype=plaintext">Copy all 4 URLs</button>
+                  </div>
+
+                  <div class="table-wrapper">
+                    <table>
+                      <thead>
+                        <tr><th>Filter List</th><th>Purpose</th><th>URL</th><th>Priority</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>EasyList</td>
+                          <td>Core ad-blocking rules used by most ad blockers</td>
+                          <td>
+                            <div class="copy-cell">
+                              <span class="mono-text">easylist.to/easylist/easylist.txt</span>
+                              <button class="copy-btn" type="button" data-copy="https://easylist.to/easylist/easylist.txt" aria-label="Copy EasyList URL">Copy</button>
+                            </div>
+                          </td>
+                          <td><span class="pill pill-required">Required</span></td>
+                        </tr>
+                        <tr>
+                          <td>EasyPrivacy</td>
+                          <td>Blocks tracking scripts and analytics beacons</td>
+                          <td>
+                            <div class="copy-cell">
+                              <span class="mono-text">easylist.to/easylist/easyprivacy.txt</span>
+                              <button class="copy-btn" type="button" data-copy="https://easylist.to/easylist/easyprivacy.txt" aria-label="Copy EasyPrivacy URL">Copy</button>
+                            </div>
+                          </td>
+                          <td><span class="pill pill-required">Required</span></td>
+                        </tr>
+                        <tr>
+                          <td>Fanboy's Annoyance List</td>
+                          <td>Removes cookie notices, pop-ups, and social widgets</td>
+                          <td>
+                            <div class="copy-cell">
+                              <span class="mono-text">easylist.to/easylist/fanboy-annoyance.txt</span>
+                              <button class="copy-btn" type="button" data-copy="https://easylist.to/easylist/fanboy-annoyance.txt" aria-label="Copy Fanboy's Annoyance List URL">Copy</button>
+                            </div>
+                          </td>
+                          <td><span class="pill pill-recommended">Recommended</span></td>
+                        </tr>
+                        <tr>
+                          <td>Peter Lowe's Ad Server List</td>
+                          <td>Host-level blocking for known ad and tracking domains</td>
+                          <td>
+                            <div class="copy-cell">
+                              <span class="mono-text">pgl.yoyo.org/adservers/…</span>
+                              <button class="copy-btn" type="button" data-copy="https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&mimetype=plaintext" aria-label="Copy Peter Lowe's Ad Server List URL">Copy</button>
+                            </div>
+                          </td>
+                          <td><span class="pill pill-optional">Optional</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="table-caption">Add EasyList and EasyPrivacy first — they cover the vast majority of ads and trackers on their own.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PART 2 -->
+        <div class="rail-row" data-rail="2">
+          <span class="rail-marker" aria-hidden="true"></span>
+          <div class="acc" id="acc-part2" data-part="2">
+            <h3 class="acc-h">
+              <button class="acc-btn" type="button" aria-expanded="false" aria-controls="acc-part2-body">
+                <span class="acc-tile mono-num">02</span>
+                <span class="acc-heading">
+                  <span class="acc-kicker mono-num">Part 02</span>
+                  <span class="acc-title">WebView DevTools Optimization</span>
+                </span>
+                <span class="acc-meta mono-num">6 flags</span>
+                <span class="acc-chevron"><svg class="icon" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></span>
+              </button>
+            </h3>
+            <div class="acc-panel" id="acc-part2-body" role="region" aria-label="Part 2 — WebView DevTools Optimization">
+              <div class="acc-panel-inner">
+                <div class="acc-body">
+                  <p>Via Browser runs on Android's system WebView, which exposes an experimental flags page (similar to <code>chrome://flags</code> on desktop Chrome). A handful of these flags noticeably improve scrolling smoothness, network speed, and image loading on mid-range hardware.</p>
+                  <p>Open Via's menu, look for <strong>Kernel</strong> or <strong>Flags</strong> in settings — on devices where it isn't exposed there, you can reach the same page through Android's <strong>WebView DevTools</strong> app (Settings → System → Developer options → WebView DevTools → Flags). Search each flag name below and set it to the recommended value.</p>
+
+                  <div class="table-wrapper">
+                    <table>
+                      <thead>
+                        <tr><th>Flag</th><th>What it does</th><th>Recommended</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <div class="copy-cell">
+                              <span class="mono-text">enable-quic</span>
+                              <button class="copy-btn" type="button" data-copy="enable-quic" aria-label="Copy flag name enable-quic">Copy</button>
+                            </div>
+                          </td>
+                          <td>Uses the QUIC transport protocol for faster, more resilient connections</td>
+                          <td>Enabled</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="copy-cell">
+                              <span class="mono-text">enable-parallel-downloading</span>
+                              <button class="copy-btn" type="button" data-copy="enable-parallel-downloading" aria-label="Copy flag name enable-parallel-downloading">Copy</button>
+                            </div>
+                          </td>
+                          <td>Splits downloads into parallel requests to finish faster</td>
+                          <td>Enabled</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="copy-cell">
+                              <span class="mono-text">smooth-scrolling</span>
+                              <button class="copy-btn" type="button" data-copy="smooth-scrolling" aria-label="Copy flag name smooth-scrolling">Copy</button>
+                            </div>
+                          </td>
+                          <td>Animates scrolling instead of jumping between frames</td>
+                          <td>Enabled</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="copy-cell">
+                              <span class="mono-text">enable-back-forward-cache</span>
+                              <button class="copy-btn" type="button" data-copy="enable-back-forward-cache" aria-label="Copy flag name enable-back-forward-cache">Copy</button>
+                            </div>
+                          </td>
+                          <td>Keeps recent pages in memory for instant back/forward navigation</td>
+                          <td>Enabled</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="copy-cell">
+                              <span class="mono-text">enable-lazy-image-loading</span>
+                              <button class="copy-btn" type="button" data-copy="enable-lazy-image-loading" aria-label="Copy flag name enable-lazy-image-loading">Copy</button>
+                            </div>
+                          </td>
+                          <td>Defers offscreen images until you scroll near them</td>
+                          <td>Enabled</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="copy-cell">
+                              <span class="mono-text">enable-lazy-frame-loading</span>
+                              <button class="copy-btn" type="button" data-copy="enable-lazy-frame-loading" aria-label="Copy flag name enable-lazy-frame-loading">Copy</button>
+                            </div>
+                          </td>
+                          <td>Same as above, applied to embedded iframes (ads, widgets)</td>
+                          <td>Enabled</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="table-caption">Flag names and availability can differ slightly across WebView versions. If one isn't listed, search by keyword in the flags search box.</p>
+                  <p>After changing flags, fully close and reopen Via Browser (swipe it away from Recents) so the changes take effect.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PART 3 -->
+        <div class="rail-row" data-rail="3">
+          <span class="rail-marker" aria-hidden="true"></span>
+          <div class="acc" id="acc-part3" data-part="3" data-checkcount>
+            <h3 class="acc-h">
+              <button class="acc-btn" type="button" aria-expanded="false" aria-controls="acc-part3-body">
+                <span class="acc-tile"><svg class="icon" viewBox="0 0 24 24"><use href="#i-shield"/></svg></span>
+                <span class="acc-heading">
+                  <span class="acc-kicker mono-num">Part 03</span>
+                  <span class="acc-title">Via Browser Privacy Settings</span>
+                </span>
+                <span class="acc-meta mono-num"><span data-countvalue>0</span>/7 applied</span>
+                <span class="acc-chevron"><svg class="icon" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></span>
+              </button>
+            </h3>
+            <div class="acc-panel" id="acc-part3-body" role="region" aria-label="Part 3 — Via Browser Privacy Settings">
+              <div class="acc-panel-inner">
+                <div class="acc-body">
+                  <p>Ad blocking stops ads. These settings, all under <strong>Settings → Privacy</strong>, stop the data collection that funds them. Check each one off as you apply it.</p>
+                  <div class="check-group">
+                    <div class="check">
+                      <input type="checkbox" id="priv1">
+                      <label for="priv1"><span class="check-label">Turn off "Save passwords"</span><span class="check-desc">Stops the browser from storing login credentials on the device.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="priv2">
+                      <label for="priv2"><span class="check-label">Block third-party cookies</span><span class="check-desc">Prevents ad networks from tracking you as you move between sites.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="priv3">
+                      <label for="priv3"><span class="check-label">Enable the "Do Not Track" request header</span><span class="check-desc">Signals sites not to track you — advisory, and not every site honors it.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="priv4">
+                      <label for="priv4"><span class="check-label">Clear browsing data on exit</span><span class="check-desc">Wipes history, cache, and cookies every time you close the browser.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="priv5">
+                      <label for="priv5"><span class="check-label">Turn off usage statistics / ad personalization</span><span class="check-desc">Stops the browser from sending anonymized usage data back to its developer.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="priv6">
+                      <label for="priv6"><span class="check-label">Disable location access for the browser</span><span class="check-desc">Sites can no longer request your GPS position by default.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="priv7">
+                      <label for="priv7"><span class="check-label">Set a Private DNS provider (Android system setting)</span><span class="check-desc">Routes DNS lookups through an encrypted resolver instead of your carrier's default.</span></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PART 4 -->
+        <div class="rail-row" data-rail="4">
+          <span class="rail-marker" aria-hidden="true"></span>
+          <div class="acc" id="acc-part4" data-part="4">
+            <h3 class="acc-h">
+              <button class="acc-btn" type="button" aria-expanded="false" aria-controls="acc-part4-body">
+                <span class="acc-tile"><svg class="icon" viewBox="0 0 24 24"><use href="#i-flask"/></svg></span>
+                <span class="acc-heading">
+                  <span class="acc-kicker mono-num">Part 04</span>
+                  <span class="acc-title">Testing &amp; Verification</span>
+                </span>
+                <span class="acc-meta mono-num">4 checks</span>
+                <span class="acc-chevron"><svg class="icon" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></span>
+              </button>
+            </h3>
+            <div class="acc-panel" id="acc-part4-body" role="region" aria-label="Part 4 — Testing and Verification">
+              <div class="acc-panel-inner">
+                <div class="acc-body">
+                  <p>Before you call it done, confirm the setup actually works — and that it hasn't broken anything you rely on.</p>
+                  <ol class="numbered">
+                    <li>Open a heavy, ad-supported site (a news homepage works well) and confirm no banner or video ads appear.</li>
+                    <li>Run a synthetic ad-block score test to confirm the engine is actively catching known ad slots.</li>
+                    <li>Compare page-load feel before and after — most sites should visibly finish rendering sooner with fewer resources fetched.</li>
+                    <li>Open everyday sites you actually use — email, banking, shopping — and confirm they still work normally. If something's broken, see Part 5.</li>
+                  </ol>
+                  <div class="badge-row">
+                    <span class="badge badge-ok"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check-circle"/></svg>EasyList Active</span>
+                    <span class="badge badge-ok"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check-circle"/></svg>Trackers Blocked</span>
+                    <span class="badge badge-ok"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check-circle"/></svg>Privacy Settings Applied</span>
+                    <span class="badge badge-ok"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check-circle"/></svg>Flags Configured</span>
+                  </div>
+
+                  <div class="metrics" data-metrics>
+                    <div class="metric">
+                      <div class="metric-top">
+                        <span class="metric-name">Average page load</span>
+                        <span class="metric-delta mono-num">−55%</span>
+                      </div>
+                      <div class="metric-row">
+                        <span class="metric-tag mono-num">Before</span>
+                        <div class="metric-track"><div class="metric-fill before" data-width="100"></div></div>
+                        <span class="metric-val mono-num">4.2s</span>
+                      </div>
+                      <div class="metric-row">
+                        <span class="metric-tag mono-num">After</span>
+                        <div class="metric-track"><div class="metric-fill after" data-width="45"></div></div>
+                        <span class="metric-val mono-num">1.9s</span>
+                      </div>
+                    </div>
+
+                    <div class="metric">
+                      <div class="metric-top">
+                        <span class="metric-name">Data used per page</span>
+                        <span class="metric-delta mono-num">−61%</span>
+                      </div>
+                      <div class="metric-row">
+                        <span class="metric-tag mono-num">Before</span>
+                        <div class="metric-track"><div class="metric-fill before" data-width="100"></div></div>
+                        <span class="metric-val mono-num">2.8 MB</span>
+                      </div>
+                      <div class="metric-row">
+                        <span class="metric-tag mono-num">After</span>
+                        <div class="metric-track"><div class="metric-fill after" data-width="39"></div></div>
+                        <span class="metric-val mono-num">1.1 MB</span>
+                      </div>
+                    </div>
+
+                    <div class="metric">
+                      <div class="metric-top">
+                        <span class="metric-name">Ads/trackers blocked per page</span>
+                        <span class="metric-delta mono-num">+35/page</span>
+                      </div>
+                      <div class="metric-row">
+                        <span class="metric-tag mono-num">Before</span>
+                        <div class="metric-track"><div class="metric-fill before" data-width="0"></div></div>
+                        <span class="metric-val mono-num">0</span>
+                      </div>
+                      <div class="metric-row">
+                        <span class="metric-tag mono-num">After</span>
+                        <div class="metric-track"><div class="metric-fill after" data-width="100"></div></div>
+                        <span class="metric-val mono-num">~35</span>
+                      </div>
+                    </div>
+
+                    <div class="metric">
+                      <div class="metric-top">
+                        <span class="metric-name">Ad-block test score</span>
+                        <span class="metric-delta mono-num">+100 pts</span>
+                      </div>
+                      <div class="metric-row">
+                        <span class="metric-tag mono-num">Before</span>
+                        <div class="metric-track"><div class="metric-fill before" data-width="0"></div></div>
+                        <span class="metric-val mono-num">0/100</span>
+                      </div>
+                      <div class="metric-row">
+                        <span class="metric-tag mono-num">After</span>
+                        <div class="metric-track"><div class="metric-fill after" data-width="100"></div></div>
+                        <span class="metric-val mono-num">100/100</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="table-caption">Example results from a typical ad-heavy news site. Your numbers will vary by site, device, and connection.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PART 5 -->
+        <div class="rail-row warn" data-rail="5">
+          <span class="rail-marker" aria-hidden="true"></span>
+          <div class="acc" id="acc-part5" data-part="5" data-checkcount>
+            <h3 class="acc-h">
+              <button class="acc-btn" type="button" aria-expanded="false" aria-controls="acc-part5-body">
+                <span class="acc-tile"><svg class="icon" viewBox="0 0 24 24"><use href="#i-wrench"/></svg></span>
+                <span class="acc-heading">
+                  <span class="acc-kicker mono-num">Part 05</span>
+                  <span class="acc-title">Troubleshooting</span>
+                </span>
+                <span class="acc-meta mono-num"><span data-countvalue>0</span>/6 resolved</span>
+                <span class="acc-chevron"><svg class="icon" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></span>
+              </button>
+            </h3>
+            <div class="acc-panel" id="acc-part5-body" role="region" aria-label="Part 5 — Troubleshooting">
+              <div class="acc-panel-inner">
+                <div class="acc-body">
+                  <p>Check off any issue you're seeing, then apply the fix next to it.</p>
+                  <div class="check-group">
+                    <div class="check">
+                      <input type="checkbox" id="ts1">
+                      <label for="ts1"><span class="check-label">A site looks broken or a button doesn't respond</span><span class="check-desc">Add the site to your allowlist (Settings → Ad Block → Allowed Sites) and reload the page.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="ts2">
+                      <label for="ts2"><span class="check-label">Ads are still showing</span><span class="check-desc">Force-update your filter lists (Settings → Ad Block → Update Now), then fully restart the browser.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="ts3">
+                      <label for="ts3"><span class="check-label">Videos won't play</span><span class="check-desc">Temporarily allowlist the site — some video players load through the same scripts an annoyance list blocks.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="ts4">
+                      <label for="ts4"><span class="check-label">A filter list shows "0 rules" or a red mark</span><span class="check-desc">Check your connection and re-add the URL — a firewall or VPN may be blocking the download.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="ts5">
+                      <label for="ts5"><span class="check-label">Pages feel slower, not faster</span><span class="check-desc">Remove filter lists you don't need — each additional list adds parsing overhead on every page.</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="ts6">
+                      <label for="ts6"><span class="check-label">A login or checkout page won't submit</span><span class="check-desc">Third-party cookie blocking can interfere with payment providers — allow cookies for that one site only.</span></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PART 6 -->
+        <div class="rail-row" data-rail="6">
+          <span class="rail-marker" aria-hidden="true"></span>
+          <div class="acc" id="acc-part6" data-part="6" data-checkcount>
+            <h3 class="acc-h">
+              <button class="acc-btn" type="button" aria-expanded="false" aria-controls="acc-part6-body">
+                <span class="acc-tile"><svg class="icon" viewBox="0 0 24 24"><use href="#i-calendar"/></svg></span>
+                <span class="acc-heading">
+                  <span class="acc-kicker mono-num">Part 06</span>
+                  <span class="acc-title">Maintenance Schedule</span>
+                </span>
+                <span class="acc-meta mono-num"><span data-countvalue>0</span>/8 done</span>
+                <span class="acc-chevron"><svg class="icon" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></span>
+              </button>
+            </h3>
+            <div class="acc-panel" id="acc-part6-body" role="region" aria-label="Part 6 — Maintenance Schedule">
+              <div class="acc-panel-inner">
+                <div class="acc-body">
+                  <p>A good ad-block setup degrades slowly as sites change and lists go stale. A few minutes on this schedule keeps it working.</p>
+
+                  <h4 class="cadence-title mono-num">Weekly</h4>
+                  <div class="check-group">
+                    <div class="check">
+                      <input type="checkbox" id="mw1">
+                      <label for="mw1"><span class="check-label">Update filter lists manually if auto-update is off</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="mw2">
+                      <label for="mw2"><span class="check-label">Clear cache and browsing data</span></label>
+                    </div>
+                  </div>
+
+                  <h4 class="cadence-title mono-num">Monthly</h4>
+                  <div class="check-group">
+                    <div class="check">
+                      <input type="checkbox" id="mm1">
+                      <label for="mm1"><span class="check-label">Check the Play Store for a Via Browser update</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="mm2">
+                      <label for="mm2"><span class="check-label">Review your allowlist and remove sites you no longer need excepted</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="mm3">
+                      <label for="mm3"><span class="check-label">Confirm your WebView flags from Part 2 are still set — updates can reset some of them</span></label>
+                    </div>
+                  </div>
+
+                  <h4 class="cadence-title mono-num">Quarterly</h4>
+                  <div class="check-group">
+                    <div class="check">
+                      <input type="checkbox" id="mq1">
+                      <label for="mq1"><span class="check-label">Re-run the ad-block score test to confirm nothing has regressed</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="mq2">
+                      <label for="mq2"><span class="check-label">Review privacy settings against Part 3's checklist</span></label>
+                    </div>
+                    <div class="check">
+                      <input type="checkbox" id="mq3">
+                      <label for="mq3"><span class="check-label">Back up bookmarks and settings before major Android updates</span></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /steps-rail -->
+    </div><!-- /rail-section -->
+
+    <!-- RESULTS -->
+    <section class="section" id="results">
+      <header class="section-head" data-reveal>
+        <span class="kicker"><span class="kicker-diamond" aria-hidden="true"></span>Outcomes</span>
+        <h2 class="section-title">Results You Can Expect</h2>
+      </header>
+      <div class="cards">
+        <article class="card" data-reveal>
+          <span class="card-no mono-num" aria-hidden="true">01</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#i-rocket"/></svg></span>
+          <h3 class="card-title">Faster Browsing</h3>
+          <p class="card-desc">Pages load without waiting on ad and tracker requests that never fire.</p>
+        </article>
+        <article class="card" data-reveal style="--d:60ms">
+          <span class="card-no mono-num" aria-hidden="true">02</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#i-trend-down"/></svg></span>
+          <h3 class="card-title">Less Data Used</h3>
+          <p class="card-desc">Fewer resources downloaded per page — noticeable on limited mobile plans.</p>
+        </article>
+        <article class="card" data-reveal style="--d:120ms">
+          <span class="card-no mono-num" aria-hidden="true">03</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#i-battery"/></svg></span>
+          <h3 class="card-title">Better Battery Life</h3>
+          <p class="card-desc">Less script execution per page means less CPU work overall.</p>
+        </article>
+        <article class="card" data-reveal style="--d:180ms">
+          <span class="card-no mono-num" aria-hidden="true">04</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#i-eye-off"/></svg></span>
+          <h3 class="card-title">Fewer Trackers</h3>
+          <p class="card-desc">Analytics and ad-network scripts are blocked before they ever run.</p>
+        </article>
+        <article class="card" data-reveal style="--d:240ms">
+          <span class="card-no mono-num" aria-hidden="true">05</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#i-layout"/></svg></span>
+          <h3 class="card-title">Cleaner Layout</h3>
+          <p class="card-desc">No banners, pop-ups, or auto-playing video ads competing for space.</p>
+        </article>
+        <article class="card" data-reveal style="--d:300ms">
+          <span class="card-no mono-num" aria-hidden="true">06</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check-circle"/></svg></span>
+          <h3 class="card-title">Consistent Scores</h3>
+          <p class="card-desc">A 100/100 result on standard synthetic ad-block tests.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- FINAL SUMMARY -->
+    <section class="section" id="summary">
+      <header class="section-head" data-reveal>
+        <span class="kicker"><span class="kicker-diamond" aria-hidden="true"></span>Reference</span>
+        <h2 class="section-title">Final Configuration Summary</h2>
+        <p class="section-sub">A quick reference for everything this guide sets up — useful when reapplying the setup on a new device.</p>
+      </header>
+
+      <h3 class="summary-title">Filter Lists</h3>
+      <div class="table-wrapper" data-reveal>
+        <table>
+          <thead><tr><th>Name</th><th>URL</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>EasyList</td><td><span class="mono-text">easylist.to/easylist/easylist.txt</span></td><td><span class="pill pill-required">Active</span></td></tr>
+            <tr><td>EasyPrivacy</td><td><span class="mono-text">easylist.to/easylist/easyprivacy.txt</span></td><td><span class="pill pill-required">Active</span></td></tr>
+            <tr><td>Fanboy's Annoyance List</td><td><span class="mono-text">easylist.to/easylist/fanboy-annoyance.txt</span></td><td><span class="pill pill-required">Active</span></td></tr>
+            <tr><td>Peter Lowe's Ad Server List</td><td><span class="mono-text">pgl.yoyo.org/adservers/…</span></td><td><span class="pill pill-required">Active</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="summary-title">Privacy Settings</h3>
+      <div class="table-wrapper" data-reveal>
+        <table>
+          <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Save passwords</td><td>Off</td></tr>
+            <tr><td>Third-party cookies</td><td>Blocked</td></tr>
+            <tr><td>Do Not Track</td><td>On</td></tr>
+            <tr><td>Clear data on exit</td><td>On</td></tr>
+            <tr><td>Ad personalization</td><td>Off</td></tr>
+            <tr><td>Location access</td><td>Off</td></tr>
+            <tr><td>Private DNS</td><td>Enabled</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div><!-- /layout -->
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <span class="brand-text">
+          <span class="brand-name">Via Browser</span>
+          <span class="brand-sub">Optimization Guide</span>
+        </span>
+      </div>
+      <p class="footer-tagline">A field guide to calmer, faster, more private browsing on Android — built to be re-applied on any device in about ten minutes.</p>
+    </div>
+    <nav class="footer-col" aria-label="Footer — contents">
+      <p class="footer-col-title mono-num">Contents</p>
+      <a href="#acc-part1">Filter configuration</a>
+      <a href="#acc-part2">WebView flags</a>
+      <a href="#acc-part3">Privacy settings</a>
+      <a href="#acc-part4">Testing &amp; verification</a>
+      <a href="#acc-part5">Troubleshooting</a>
+      <a href="#acc-part6">Maintenance schedule</a>
+    </nav>
+    <nav class="footer-col" aria-label="Footer — resources">
+      <p class="footer-col-title mono-num">Resources</p>
+      <a href="https://easylist.to/easylist/easylist.txt" target="_blank" rel="noopener">EasyList</a>
+      <a href="https://easylist.to/easylist/easyprivacy.txt" target="_blank" rel="noopener">EasyPrivacy</a>
+      <a href="https://easylist.to/easylist/fanboy-annoyance.txt" target="_blank" rel="noopener">Fanboy's Annoyance List</a>
+      <a href="https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&mimetype=plaintext" target="_blank" rel="noopener">Peter Lowe's Ad Servers</a>
+    </nav>
+  </div>
+  <div class="footer-bar">
+    <div class="footer-bar-inner">
+      <span>© <span id="footerYear">2026</span> Via Browser Ad Blocking and Optimization Guide.</span>
+      <div class="footer-links">
+        <a href="#">Status</a>
+        <a href="#">Help</a>
+        <a href="#">Privacy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<button class="to-top" id="toTop" type="button" aria-label="Back to top">
+  <svg class="icon" viewBox="0 0 24 24"><use href="#i-arrow-up"/></svg>
+</button>
+
+<div class="sr-only" id="srLive" role="status" aria-live="polite"></div>
+
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>
