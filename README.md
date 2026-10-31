@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/cover.svg" alt="Via Browser Optimization Guide" width="100%">
+<img src="og-image.png" alt="Via Browser Optimization Guide" width="100%">
 
 # Via Browser · Optimization Guide
 
