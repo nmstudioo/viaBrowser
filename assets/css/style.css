@@ -1,7 +1,4 @@
-/* VIA BROWSER GUIDE — "Signal & Lichen" redesign layer
-   Load AFTER the existing stylesheet. Same class names; no HTML changes needed.
-   Fonts: Bricolage Grotesque (display) · Instrument Sans (body) · JetBrains Mono (data) */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+/* VIA BROWSER GUIDE — "Signal & Lichen" override layer. Load AFTER assets/css/style.css (do NOT replace it). */
 
 /* 1 — Tokens */
 :root{
@@ -40,7 +37,6 @@
 body{font-feature-settings:"ss01","cv11";line-height:1.62;font-optical-sizing:auto}
 p,li{text-wrap:pretty}
 :focus-visible{outline:none;box-shadow:var(--ring);border-radius:var(--r-sm)}
-.section,.rail-section{content-visibility:auto;contain-intrinsic-size:auto 700px}
 @supports (animation-timeline:scroll()){
  .scroll-progress span{transform:scaleX(0);animation:prog linear both;animation-timeline:scroll(root)}
  @keyframes prog{to{transform:scaleX(1)}}
